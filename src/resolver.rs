@@ -1,5 +1,4 @@
-use crate::domain::error::NoteError;
-use crate::domain::note::{CreatedNote, NoteId, UnvalidatedNote};
+use crate::domain::note::{CreatedNote, NoteError, NoteId, UnvalidatedNote};
 use crate::domain::workflow::{create, validate, Workflow};
 
 // resolver
@@ -14,9 +13,7 @@ impl Payload {
 }
 
 pub fn resolve() -> Payload {
-    let note = UnvalidatedNote::new(NoteId {
-        id: "id".to_string(),
-    });
+    let note = UnvalidatedNote::new(NoteId::new("id".to_string()));
 
     let workflow: &Workflow = &|note: UnvalidatedNote| -> Result<CreatedNote, NoteError> {
         validate(note).and_then(create)
