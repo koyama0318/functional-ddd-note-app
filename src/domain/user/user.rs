@@ -1,8 +1,12 @@
+use super::{error::UserError, id::UserId};
+use crate::Context;
 use serde::{Deserialize, Serialize};
 
-use super::{error::UserError, id::UserId};
-
 // MARK: - States
+#[derive(Deserialize, Debug)]
+pub struct CreateUserCommand {
+    pub(crate) user: UnvalidatedUser,
+}
 
 #[derive(Deserialize, Debug)]
 pub struct UnvalidatedUser {
@@ -17,7 +21,6 @@ pub struct User {
 }
 
 // MARK: - Actions
-
 pub fn validate(user: UnvalidatedUser) -> Result<User, UserError> {
     if user.name.is_empty() && user.name.contains(" ") {
         return Err(UserError::InvalidName);
@@ -30,10 +33,14 @@ pub fn validate(user: UnvalidatedUser) -> Result<User, UserError> {
 
 // MARK: - Workflows
 
-pub type CreateUser = dyn Fn(UnvalidatedUser) -> Result<User, UserError>;
+pub type CreateUser = dyn Fn(CreateUserCommand) -> Result<User, UserError>;
 
-pub fn create_user_workflow() -> impl Fn(UnvalidatedUser) -> Result<User, UserError> {
-    |user| validate(user)
+pub fn create_user_workflow() -> impl Fn(CreateUserCommand) -> Result<User, UserError> {
+    |cmd| Ok(cmd.user).and_then(validate)
+}
+
+pub fn save_user(context: &Context) -> impl FnOnce(User) -> Result<(User), UserError> {
+    return |user| Ok((user));
 }
 
 // MARK: - Dependencies

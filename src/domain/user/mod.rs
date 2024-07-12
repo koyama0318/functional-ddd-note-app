@@ -1,4 +1,4 @@
 mod dependency;
-mod error;
+pub(crate) mod error;
 mod id;
 pub(crate) mod user;

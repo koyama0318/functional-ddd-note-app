@@ -9,9 +9,28 @@ use axum::{
     routing::{get, post},
     Router,
 };
+use once_cell::sync::OnceCell;
+
+#[derive(Debug)]
+pub struct Context {}
+
+static CONTEXT: OnceCell<Context> = OnceCell::new();
+
+impl Context {
+    pub fn global() -> &'static Context {
+        CONTEXT.get().expect("context not initialized")
+    }
+
+    pub fn initialize() {
+        let context = Context {};
+        CONTEXT.set(context).expect("Failed to set context");
+    }
+}
 
 #[tokio::main]
 async fn main() {
+    Context::initialize();
+
     let app = Router::new()
         .route("/users", post(create_user).get(list_users))
         .route(

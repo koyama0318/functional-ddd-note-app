@@ -1,4 +1,8 @@
-use crate::domain::user::user::{create_user_workflow, CreateUser, UnvalidatedUser};
+use crate::domain::user::user::save_user;
+use crate::domain::user::user::{
+    create_user_workflow, CreateUser, CreateUserCommand, UnvalidatedUser,
+};
+use crate::Context;
 use axum::{
     extract::{Json, Path},
     http::StatusCode,
@@ -7,10 +11,13 @@ use axum::{
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 
-pub async fn create_user(Json(payload): Json<UnvalidatedUser>) -> impl IntoResponse {
+pub async fn create_user(Json(input): Json<UnvalidatedUser>) -> impl IntoResponse {
+    let cmd = CreateUserCommand { user: input };
+
     let workflow: Box<CreateUser> = Box::new(create_user_workflow());
 
-    let result = workflow(payload)
+    let result = workflow(cmd)
+        .and_then(save_user(Context::global()))
         .map_err(|e| match e {
             _ => StatusCode::INTERNAL_SERVER_ERROR,
         })
