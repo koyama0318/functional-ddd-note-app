@@ -1,4 +1,4 @@
 pub enum UserError {
-    InvalidName,
-    NotFound,
+    ValidationError,
+    SaveError,
 }

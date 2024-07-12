@@ -1,5 +1,4 @@
 use super::{error::UserError, id::UserId};
-use crate::Context;
 use serde::{Deserialize, Serialize};
 
 // MARK: - States
@@ -23,7 +22,7 @@ pub struct User {
 // MARK: - Actions
 pub fn validate(user: UnvalidatedUser) -> Result<User, UserError> {
     if user.name.is_empty() && user.name.contains(" ") {
-        return Err(UserError::InvalidName);
+        return Err(UserError::ValidationError);
     }
     Ok(User {
         id: UserId::new(user.id),
@@ -31,48 +30,18 @@ pub fn validate(user: UnvalidatedUser) -> Result<User, UserError> {
     })
 }
 
+// MARK: - Dependency
+pub trait SaveUserFn: Fn(User) -> Result<User, UserError> {}
+impl<T> SaveUserFn for T where T: Fn(User) -> Result<User, UserError> + 'static {}
+
 // MARK: - Workflows
+pub trait CreateUserFn: Fn(CreateUserCommand) -> Result<User, UserError> {}
+impl<T> CreateUserFn for T where T: Fn(CreateUserCommand) -> Result<User, UserError> {}
 
-pub type CreateUser = dyn Fn(CreateUserCommand) -> Result<User, UserError>;
-
-pub fn create_user_workflow() -> impl Fn(CreateUserCommand) -> Result<User, UserError> {
-    |cmd| Ok(cmd.user).and_then(validate)
+pub fn create_user_workflow<F: SaveUserFn>(save_user: F) -> impl CreateUserFn {
+    move |cmd| {
+        Ok(cmd.user)
+            .and_then(validate)
+            .and_then(|user| save_user(user))
+    }
 }
-
-pub fn save_user(context: &Context) -> impl FnOnce(User) -> Result<(User), UserError> {
-    return |user| Ok((user));
-}
-
-// MARK: - Dependencies
-
-// type GetUserById = fn(UserId) -> Result<User, UserError>;
-
-// async fn get_note_by_id(ctx: Arc<Mutex<Connection>>) -> impl Fn(UserId) -> Result<User, UserError> {
-//     |id| Ok(User::new(id, "name".to_string()))
-// }
-
-// async fn get_user_by_ida(context: Connection, user_id: UserId) -> Result<User, UserError> {
-//     task::spawn_blocking(move || {
-//         // let conn = context.lock().unwrap();
-//         let mut stmt = context
-//             .prepare("SELECT id, name FROM user WHERE id = ?1")
-//             .unwrap();
-
-//         let mut user_iter = stmt
-//             .query_map(params![user_id.id()], |row| {
-//                 Ok(User::new(
-//                     UserId::new(row.get(0).unwrap_or("".to_string())),
-//                     row.get(1).unwrap_or("".to_string()),
-//                 ))
-//             })
-//             .unwrap();
-
-//         user_iter
-//             .next()
-//             .transpose()
-//             .unwrap()
-//             .ok_or(UserError::NotFound)
-//     })
-//     .await
-//     .unwrap()
-// }
