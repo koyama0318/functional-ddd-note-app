@@ -3,7 +3,7 @@ content-type: application/json
 
 {
     "id": 1,
-    "name": "jone doe"
+    "name": "jonedoe"
 }
 
 ###
@@ -17,7 +17,7 @@ content-type: application/json
 
 {
     "id": 1,
-    "name": "jane doe"
+    "name": "janedoe"
 }
 
 ###

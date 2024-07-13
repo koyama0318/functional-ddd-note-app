@@ -1,2 +1,2 @@
-pub(crate) mod error_response;
-pub(crate) mod handlers;
+pub(crate) mod controllers;
+pub(crate) mod gateways;
