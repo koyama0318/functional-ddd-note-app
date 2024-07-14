@@ -1,8 +1,4 @@
-use crate::domain::user::{
-    core::{DeleteUserFn, GetUserFn, UpsertUserFn, User},
-    error::UserError,
-    id::UserId,
-};
+use crate::domain::user::{core::*, error::UserError, id::UserId};
 use rusqlite::Connection;
 
 pub fn upsert_user_fn() -> impl UpsertUserFn {
@@ -26,11 +22,13 @@ pub fn get_user_fn() -> impl GetUserFn {
         let mut stmt = conn
             .prepare("SELECT id, name FROM users WHERE id = ?1")
             .map_err(|e| UserError::DatabaseError(e.to_string()))?;
+
         let result = stmt
             .query_row([id.id()], |row| {
                 Ok(User::new(UserId::new(row.get(0)?).unwrap(), row.get(1)?))
             })
             .map_err(|e| UserError::DatabaseError(e.to_string()));
+
         result
     }
 }

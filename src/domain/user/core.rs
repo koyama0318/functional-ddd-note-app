@@ -33,10 +33,10 @@ pub fn validate(user: UnvalidatedUser) -> Result<User, UserError> {
 }
 
 pub fn validate_and_apply(user: User, changes: UnvalidatedUserChanges) -> Result<User, UserError> {
-    let applyed = UnvalidatedUser {
+    let applied = UnvalidatedUser {
         name: changes.name.unwrap_or(user.name),
     };
-    validate(applyed)
+    validate(applied)
 }
 
 // MARK: - Dependency

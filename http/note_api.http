@@ -2,24 +2,27 @@ POST http://127.0.0.1:3000/notes
 content-type: application/json
 
 {
-    "id": 1,
-    "name": "jonedoe"
+    "user_id": "9d40cbdd-709e-4fec-a059-0b29ce8f7444",
+    "content": "Two giants live in Britain's land, John Doe and Richard Roe, Who always travel hand in hand, John Doe and Richard Roe. Their fee-faw-fum's an ancient plan To smell the purse of an Englishman, And, 'ecod, they'll suck it all they can, John Doe and Richard Roe ..."
 }
-
-###
-
-GET http://127.0.0.1:3000/notes/1
 
 ### 
 
-PUT http://127.0.0.1:3000/notes/1
+GET http://127.0.0.1:3000/users/9d40cbdd-709e-4fec-a059-0b29ce8f7444/notes
+
+### 
+
+GET http://127.0.0.1:3000/notes/e91d7c25-33c7-42bf-8861-fdeed4675b43
+
+### 
+
+PUT http://127.0.0.1:3000/notes/e91d7c25-33c7-42bf-8861-fdeed4675b43
 content-type: application/json
 
 {
-    "id": 1,
-    "name": "aaa"
+    "content": "Two giants live in Britain's land"
 }
 
 ###
 
-DELETE http://127.0.0.1:3000/notes/3
+DELETE http://127.0.0.1:3000/notes/841ed360-2ff6-4096-ac7f-27fc5a2136c2

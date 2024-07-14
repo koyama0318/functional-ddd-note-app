@@ -17,10 +17,8 @@ async fn main() {
                 .put(user_handlers::update_user)
                 .delete(user_handlers::delete_user),
         )
-        .route(
-            "/notes",
-            post(note_handlers::create_note).get(note_handlers::list_notes),
-        )
+        .route("/users/:user_id/notes", get(note_handlers::list_note))
+        .route("/notes", post(note_handlers::create_note))
         .route(
             "/notes/:id",
             get(note_handlers::get_note)

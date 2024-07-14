@@ -2,7 +2,7 @@ use super::error::UserError;
 use serde::Serialize;
 use uuid::Uuid;
 
-#[derive(Serialize, Debug)]
+#[derive(Serialize, Debug, Clone)]
 pub struct UserId {
     id: String,
 }
