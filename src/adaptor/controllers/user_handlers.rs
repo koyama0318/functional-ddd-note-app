@@ -1,12 +1,8 @@
-use crate::adaptor::gateways::user_repository::{
-    delete_user_fn, get_user_fn, get_users_fn, save_user_fn,
-};
-use crate::domain::user::core::{
-    create_user_workflow, delete_user_workflow, get_user_workflow, list_users_workflow,
-    update_user_workflow, CreateUserCommand, DeleteUserCommand, GetUserCommand, ListUserCommand,
-    UnvalidatedUser, UnvalidatedUserChanges, UpdateUserCommand,
-};
+use crate::adaptor::gateways::user_repository::{delete_user_fn, get_user_fn, save_user_fn};
+use crate::domain::user::command::*;
+use crate::domain::user::core::*;
 use crate::domain::user::error::UserError;
+use crate::domain::user::workflow::*;
 use axum::{
     extract::{Json, Path},
     http::StatusCode,
@@ -21,14 +17,6 @@ pub async fn create_user(Json(input): Json<UnvalidatedUser>) -> impl IntoRespons
     let workflow = Box::new(create_user_workflow(save_user_fn));
     let user = workflow(cmd).map_err(handle_error);
     (StatusCode::CREATED, Json(user))
-}
-
-pub async fn list_users() -> impl IntoResponse {
-    let cmd = ListUserCommand {};
-    let get_users_fn = get_users_fn();
-    let workflow = Box::new(list_users_workflow(get_users_fn));
-    let users = workflow(cmd).map_err(handle_error);
-    (StatusCode::OK, Json(users))
 }
 
 pub async fn get_user(Path(id): Path<u64>) -> impl IntoResponse {
@@ -62,5 +50,6 @@ pub async fn delete_user(Path(id): Path<u64>) -> impl IntoResponse {
 fn handle_error(e: UserError) -> ErrorResponse {
     match e {
         UserError::ValidationError => ErrorResponse::new(StatusCode::BAD_REQUEST, "Invalid input"),
+        UserError::AlreadyExists => ErrorResponse::new(StatusCode::BAD_REQUEST, "Already exists"),
     }
 }

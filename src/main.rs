@@ -1,7 +1,7 @@
 mod adaptor;
 mod domain;
 
-use adaptor::controllers::user_handlers;
+use adaptor::controllers::{note_handlers, user_handlers};
 use axum::{
     routing::{get, post},
     Router,
@@ -10,21 +10,23 @@ use axum::{
 #[tokio::main]
 async fn main() {
     let app = Router::new()
-        .route(
-            "/users",
-            post(user_handlers::create_user).get(user_handlers::list_users),
-        )
+        .route("/users", post(user_handlers::create_user))
         .route(
             "/users/:id",
             get(user_handlers::get_user)
                 .put(user_handlers::update_user)
                 .delete(user_handlers::delete_user),
+        )
+        .route(
+            "/notes",
+            post(note_handlers::create_note).get(note_handlers::list_notes),
+        )
+        .route(
+            "/notes/:id",
+            get(note_handlers::get_note)
+                .put(note_handlers::update_note)
+                .delete(note_handlers::delete_note),
         );
-    // .route("/notes", post(create_note).get(list_notes))
-    // .route(
-    //     "/notes/:id",
-    //     get(get_note).put(update_note).delete(delete_note),
-    // );
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
     axum::serve(listener, app).await.unwrap();

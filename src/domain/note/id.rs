@@ -1,14 +1,14 @@
-use super::error::UserError;
+use super::error::NoteError;
 use serde::Serialize;
 
 #[derive(Serialize, Debug)]
-pub struct UserId {
+pub struct NoteId {
     id: u64,
 }
 
-impl UserId {
+impl NoteId {
     pub fn new(id: u64) -> Self {
-        UserId { id: id }
+        NoteId { id: id }
     }
 
     pub fn id(&self) -> u64 {
@@ -16,6 +16,6 @@ impl UserId {
     }
 }
 
-pub fn user_id(id: u64) -> Result<UserId, UserError> {
-    Ok(UserId::new(id))
+pub fn note_id(id: u64) -> Result<NoteId, NoteError> {
+    Ok(NoteId { id: id })
 }

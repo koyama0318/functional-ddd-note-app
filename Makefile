@@ -1,5 +1,5 @@
 DB_NAME := database.sqlite3
-INIT_SCRIPT := init.sql
+INIT_SCRIPT := migration/init.sql
 
 .PHONY: all init_db clean
 
