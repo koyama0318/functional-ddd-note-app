@@ -1,14 +1,22 @@
-use crate::domain::user::core::{DeleteUserFn, GetUserFn, SaveUserFn, User};
+use crate::domain::user::{
+    core::{DeleteUserFn, GetUserFn, UpsertUserFn, User},
+    error::UserError,
+    id::UserId,
+};
 use rusqlite::Connection;
 
-pub fn save_user_fn() -> impl SaveUserFn {
+pub fn upsert_user_fn() -> impl UpsertUserFn {
     move |user| {
         let conn = Connection::open("database.sqlite3").expect("msg");
         let result = conn.execute(
-            "INSERT INTO users (id, name) VALUES (?1, ?2)",
-            (&user.id(), &user.name),
+            "INSERT INTO users (id, name) VALUES (?1, ?2) \
+            ON CONFLICT(id) DO UPDATE SET name=excluded.name",
+            (&user.id, &user.name),
         );
-        Ok(user)
+        match result {
+            Ok(_) => Ok(user),
+            Err(e) => Err(UserError::DatabaseError(e.to_string())),
+        }
     }
 }
 
@@ -17,11 +25,13 @@ pub fn get_user_fn() -> impl GetUserFn {
         let conn = Connection::open("database.sqlite3").expect("msg");
         let mut stmt = conn
             .prepare("SELECT id, name FROM users WHERE id = ?1")
-            .unwrap();
-        let user = stmt
-            .query_row([id.id()], |row| Ok(User::new(row.get(0)?, row.get(1)?)))
-            .unwrap();
-        Ok(user)
+            .map_err(|e| UserError::DatabaseError(e.to_string()))?;
+        let result = stmt
+            .query_row([id.id()], |row| {
+                Ok(User::new(UserId::new(row.get(0)?).unwrap(), row.get(1)?))
+            })
+            .map_err(|e| UserError::DatabaseError(e.to_string()));
+        result
     }
 }
 
@@ -29,6 +39,9 @@ pub fn delete_user_fn() -> impl DeleteUserFn {
     move |id| {
         let conn = Connection::open("database.sqlite3").expect("msg");
         let result = conn.execute("DELETE FROM users WHERE id = ?1", [id.id()]);
-        Ok(())
+        match result {
+            Ok(_) => Ok(id),
+            Err(e) => Err(UserError::DatabaseError(e.to_string())),
+        }
     }
 }

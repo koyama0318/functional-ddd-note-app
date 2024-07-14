@@ -1,21 +1,27 @@
 use super::error::UserError;
 use serde::Serialize;
+use uuid::Uuid;
 
 #[derive(Serialize, Debug)]
 pub struct UserId {
-    id: u64,
+    id: String,
 }
 
 impl UserId {
-    pub fn new(id: u64) -> Self {
-        UserId { id: id }
+    pub fn default() -> Self {
+        UserId {
+            id: Uuid::new_v4().to_string(),
+        }
     }
 
-    pub fn id(&self) -> u64 {
+    pub fn new(id: String) -> Result<Self, UserError> {
+        match uuid::Uuid::parse_str(&id) {
+            Ok(_) => Ok(UserId { id }),
+            Err(_) => Err(UserError::ValidationError),
+        }
+    }
+
+    pub fn id(&self) -> String {
         self.id.clone()
     }
-}
-
-pub fn user_id(id: u64) -> Result<UserId, UserError> {
-    Ok(UserId::new(id))
 }

@@ -9,16 +9,16 @@ pub struct CreateUserCommand {
 
 #[derive(Deserialize, Debug)]
 pub struct GetUserCommand {
-    pub(crate) id: u64,
+    pub(crate) id: String,
 }
 
 #[derive(Deserialize, Debug)]
 pub struct UpdateUserCommand {
-    pub(crate) id: u64,
+    pub(crate) id: String,
     pub(crate) changes: UnvalidatedUserChanges,
 }
 
 #[derive(Deserialize, Debug)]
 pub struct DeleteUserCommand {
-    pub(crate) id: u64,
+    pub(crate) id: String,
 }

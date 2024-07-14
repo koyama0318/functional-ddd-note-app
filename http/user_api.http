@@ -2,24 +2,23 @@ POST http://127.0.0.1:3000/users
 content-type: application/json
 
 {
-    "id": 5,
-    "name": "jonedoe"
+    "name": "John Doe"
 }
 
 ### 
 
-GET http://127.0.0.1:3000/users/3
+GET http://127.0.0.1:3000/users/350b30d3-b4ca-4532-afb4-03c01f1320b3
 
 ### 
 
-PUT http://127.0.0.1:3000/users/1
+PUT http://127.0.0.1:3000/users/b99f9e4a-8c78-4aba-b622-6f5593336e2c
 content-type: application/json
 
 {
     "id": 1,
-    "name": "janedoe"
+    "name": "Jane Doe"
 }
 
 ###
 
-DELETE http://127.0.0.1:3000/users/3
+DELETE http://127.0.0.1:3000/users/5c9a154c-63e4-4e7d-8923-c73ea4f1a496

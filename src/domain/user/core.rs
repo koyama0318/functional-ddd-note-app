@@ -1,10 +1,9 @@
-use super::{error::UserError, id::UserId};
+use super::{error::UserError, id::*};
 use serde::{Deserialize, Serialize};
 
 // MARK: - States
 #[derive(Deserialize, Debug)]
 pub struct UnvalidatedUser {
-    id: u64,
     name: String,
 }
 
@@ -15,50 +14,37 @@ pub struct UnvalidatedUserChanges {
 
 #[derive(Serialize)]
 pub struct User {
-    id: UserId,
+    pub(crate) id: String,
     pub(crate) name: String,
 }
 
 impl User {
-    pub fn new(id: u64, name: String) -> Self {
-        User {
-            id: UserId::new(id),
-            name: name,
-        }
-    }
-
-    pub fn id(&self) -> u64 {
-        self.id.id()
+    pub fn new(id: UserId, name: String) -> Self {
+        User { id: id.id(), name }
     }
 }
 
 // MARK: - Actions
 pub fn validate(user: UnvalidatedUser) -> Result<User, UserError> {
-    if user.name.is_empty() && user.name.contains(" ") {
+    if user.name.is_empty() {
         return Err(UserError::ValidationError);
     }
-    Ok(User {
-        id: UserId::new(user.id),
-        name: user.name,
-    })
+    Ok(User::new(UserId::default(), user.name))
 }
 
-pub fn validate_and_apply(
-    user: User,
-    changes: UnvalidatedUserChanges,
-) -> Result<UnvalidatedUser, UserError> {
-    Ok(UnvalidatedUser {
-        id: user.id(),
+pub fn validate_and_apply(user: User, changes: UnvalidatedUserChanges) -> Result<User, UserError> {
+    let applyed = UnvalidatedUser {
         name: changes.name.unwrap_or(user.name),
-    })
+    };
+    validate(applyed)
 }
 
 // MARK: - Dependency
-pub trait SaveUserFn: Fn(User) -> Result<User, UserError> + Clone {}
-impl<T> SaveUserFn for T where T: Fn(User) -> Result<User, UserError> + 'static + Clone {}
+pub trait UpsertUserFn: Fn(User) -> Result<User, UserError> + Clone {}
+impl<T> UpsertUserFn for T where T: Fn(User) -> Result<User, UserError> + 'static + Clone {}
 
 pub trait GetUserFn: Fn(UserId) -> Result<User, UserError> + Clone {}
 impl<T> GetUserFn for T where T: Fn(UserId) -> Result<User, UserError> + 'static + Clone {}
 
-pub trait DeleteUserFn: Fn(UserId) -> Result<(), UserError> + Clone {}
-impl<T> DeleteUserFn for T where T: Fn(UserId) -> Result<(), UserError> + 'static + Clone {}
+pub trait DeleteUserFn: Fn(UserId) -> Result<UserId, UserError> + Clone {}
+impl<T> DeleteUserFn for T where T: Fn(UserId) -> Result<UserId, UserError> + 'static + Clone {}
